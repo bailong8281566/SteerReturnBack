@@ -95,6 +95,7 @@ def tx_threading(bus,db):
     global RB_FLAG,SteerReturnConfirm,EPS_Count
 
     msg_data_3F2 = {i.name:0 for i in db.get_message_by_name("ADAS_3F2_PSA1").signals}
+    ADAS_3F2_PSA1_msg = db.get_message_by_name("ADAS_3F2_PSA1")
     # data = bytearray([0,0,0,0,0,0,0,0])
     # print('SteerReturnFlag_global:%d\n'%SteerReturnFlag)
     while True:
@@ -161,6 +162,7 @@ def tx_threading(bus,db):
             EPS_Count = 10
 
         # print('stEPSCtlCMD%d'%stEPSCtlCMD)
+        ADAS_3F2_PSA1_data = ADAS_3F2_PSA1_msg.encode(ADAS_3F2_PSA1_data)
         msg = can.Message(is_extended_id=False, arbitration_id=0x3f2, data=ADAS_3F2_PSA1_data)
         try:
             bus.send(msg)
