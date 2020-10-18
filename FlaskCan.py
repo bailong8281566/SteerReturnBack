@@ -78,11 +78,7 @@ def rx_threading(bus):
                     CurSteerAngle = ((msg.data[0]<<8) +(msg.data[1]))*0.1
                 else:
                     CurSteerAngle = -0.1*((~((msg.data[0]<<8) +(msg.data[1])) & 0xFFFF) + 1)
-            #print(msg.arbitration_id,msg.data)
-            # print('EPS_STATE_LKA%d'%EPS_STATE_LKA)
-            #print('EPS_STATE_LKA%d'%EPS_STATE_LKA,'Driver_belt%d'%Driver_belt,'door_state%d'%door_state,
-                 # 'main_state%d'%main_state,'CurSteerAngle%f'%CurSteerAngle)
-            #if (Driver_belt == 1) and (main_state != 1) and (door_state == 0):
+
             if (Driver_belt == 1) and (door_state == 0):
                 DriverOffFlag = 1
             else:
@@ -92,8 +88,6 @@ def rx_threading(bus):
                 HardwareState = 0
             else:
                 HardwareState = 1
-            
-            #print('DriverOffFlag%d'%DriverOffFlag)
 
 def tx_threading(bus):
     global EPS_STATE_LKA
@@ -110,13 +104,11 @@ def tx_threading(bus):
                 stEPSCtlCMD = 3
             elif EPS_STATE_LKA == 1:
                 stEPSCtlCMD = 4
-            
             elif EPS_STATE_LKA == 3:
                 stEPSCtlCMD = 4
             else:
                 stEPSCtlCMD = 2
-                
-            print('stEPSCtlCMD%d'%stEPSCtlCMD)
+
             if (CurSteerAngle > 0)  and (RB_FLAG == 0):
                 RB_FLAG = 1
             if RB_FLAG == 1:
@@ -134,14 +126,6 @@ def tx_threading(bus):
                 RB_FLAG = 0
                 EPS_Count = 10
                 SteerReturnConfirm = 1
-            #     RB_FLAG = 3
-            # if RB_FLAG == 3:
-            #     setpoint = CurSteerAngle - 1
-            # if(RB_FLAG ==3) and (CurSteerAngle < -2):
-            #     setpoint = 0
-            #     RB_FLAG = 0
-            #     EPS_Count = 10
-            #     SteerReturnConfirm = 1
                 
             if (CurSteerAngle < 0)  and (RB_FLAG == 0):
                 RB_FLAG = -1
@@ -160,18 +144,7 @@ def tx_threading(bus):
                 RB_FLAG = 0
                 EPS_Count = 10
                 SteerReturnConfirm = 1
-                
-            #     RB_FLAG = -3
-            # if RB_FLAG == -3:
-            #     setpoint = CurSteerAngle + 1
-            # if(RB_FLAG == -3) and (CurSteerAngle > 2):
-            #     setpoint = 0
-            #     RB_FLAG = 0
-            #     EPS_Count = 10
-            #     SteerReturnConfirm = 1
-                
-            # print('CurSteerAngle%.2f'%CurSteerAngle)
-            # print('setpoint%d'%setpoint)
+
             if setpoint >= 0:
                 byteAngle = (int(setpoint*10))<<2
             else:
