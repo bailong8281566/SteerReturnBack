@@ -152,7 +152,7 @@ def tx_threading(bus):
             byteAngle_H = (byteAngle & 0xff00)>>8
             byteAngle_L =  (byteAngle & 0xff)
             byteEPSCtlCMD = stEPSCtlCMD<<2
-            cofficient = 0.5
+            cofficient = 0.6
             cofficientCMD = int((cofficient*100))<<1
             # data = bytearray([0x0,0x0,0x0,0x0,byteEPSCtlCMD,0xc9,byteAngle_H,byteAngle_L])
             data = bytearray([0x0,0x0,0x0,0x0,byteEPSCtlCMD,cofficientCMD,byteAngle_H,byteAngle_L])
