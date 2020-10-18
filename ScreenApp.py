@@ -210,6 +210,11 @@ class Userpage(Screen):
     rightline_pos = ListProperty()
     DEBUG = 0
 
+    blink_Flag = 0
+    blink_timer = 0
+    warn1_Flag = 0
+    warn2_Flag = 0
+
     MAXtAngle = 90
 
     def Straighten(self):
@@ -258,19 +263,6 @@ class Userpage(Screen):
         HardwareState = get_data['HardwareState']
         EPS_STATE_LKA = get_data['EPS_STATE_LKA']
         SteerReturnConfirm = get_data['SteerReturnConfirm']
-        # try:
-        #     self.CurSteerAngle = int(get_data['CurSteerAngle'])
-        #     self.DriverOffFlag = get_data['DriverOffFlag']
-        #     HardwareState = get_data['HardwareState']
-        #     EPS_STATE_LKA = get_data['EPS_STATE_LKA']
-        #     SteerReturnConfirm = get_data['SteerReturnConfirm']
-        # except:
-            # self.CurSteerAngle = 0
-            # self.DriverOffFlag = 0
-            # HardwareState = 0
-            # EPS_STATE_LKA = 0
-            # SteerReturnConfirm = 0
-            # pass
         self.line_pos_rgb()
         
         if (SteerReturnConfirm == 1) or ((EPS_STATE_LAST == 3) and (EPS_STATE_LKA != 3)):
@@ -284,7 +276,8 @@ class Userpage(Screen):
         EPS_STATE_LAST = EPS_STATE_LKA
         self.buttonHint = '车辆已泊正'
         self.showPic()
-        self.blink()
+        if HardwareState == 0:#满足提醒条件（P档）时，调用闪烁警示函数
+            self.blink_warn()
         
         if (EPS_STATE_LKA == 4) or (self.NetState == 'CAN网络异常'):
             self.EPSState = '回正功能异常'
@@ -333,13 +326,38 @@ class Userpage(Screen):
             # self.CurrentSteerPic = 'assets/aeolus.png'
             self.buttonHint = '车辆未泊正，是否回正？'
             self.bottonState = 0
-    def blink(self):
-        self.ids.curstAngle.color[-1] = 1 - self.ids.curstAngle.color[-1]
-        self.ids.userButton.color[-1] = 1 - self.ids.userButton.color[-1]
-        if (abs(self.CurSteerAngle >= 180)):
-            pass
-        if (abs(self.CurSteerAngle > 45) and abs(self.CurSteerAngle < 180)):
-            pass
+    def blink_warn(self):
+        '''
+        P档
+        ---方向盘转角绝对值大于45°时，图标闪烁
+        ---方向盘转角绝对值大于45°小于180度时，提示bibi声
+        ---方向盘转角绝对值大于180°时，提示didi声
+        '''
+        if abs(self.CurSteerAngle) >= 45:
+            self.blink_timer = self.blink_timer + 1
+            if self.blink_timer >= 2:
+                self.ids.curstAngle.color[-1] = 1 - self.ids.curstAngle.color[-1]
+                self.ids.userButton.color[-1] = 1 - self.ids.userButton.color[-1]
+                self.blink_timer = 0
+        else:
+            self.ids.curstAngle.color[-1] = 1
+            self.ids.userButton.color[-1] = 1
+            
+        if (abs(self.CurSteerAngle) >= 45) and (self.warn1_Flag == 0):
+            self.warn1_Flag = 1
+            sound = SoundLoader.load('assets/bibi.wav')
+            sound.play()
+        if abs(self.CurSteerAngle) < 45:
+            self.warn1_Flag = 0
+
+        if (abs(self.CurSteerAngle) >= 180) and (self.warn2_Flag == 0):
+            self.warn2_Flag = 1
+            sound = SoundLoader.load('assets/didi.wav')
+            sound.play()
+        if abs(self.CurSteerAngle) < 180:
+            self.warn2_Flag = 0
+
+        
 
 class Menu(ScreenManager):
     poweronpage = ObjectProperty(None)
@@ -377,11 +395,11 @@ class Menu(ScreenManager):
         #     self.current = "poweron_page"
         
     def if_error(self,request,result, *args):
-        # print('IP ERROR')
+        print('IP ERROR')
         global NetCounter
         NetCounter = NetCounter + 1
         if NetCounter > 5:
-            self.current = "user_page"
+            self.current = "login_page"
             NetCounter = 0
     
 class MyApp(App):
