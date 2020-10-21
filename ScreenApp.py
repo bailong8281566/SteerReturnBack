@@ -276,7 +276,8 @@ class Userpage(Screen):
         EPS_STATE_LAST = EPS_STATE_LKA
         self.buttonHint = '车辆已泊正'
         self.showPic()
-        if HardwareState == 0:#满足提醒条件（P档）时，调用闪烁警示函数
+        if (HardwareState == 0) and (SteerReturnConfirm != 1):
+            #满足提醒条件（P档）且不是正在执行回正时，调用闪烁警示函数
             self.blink_warn()
         
         if (EPS_STATE_LKA == 4) or (self.NetState == 'CAN网络异常'):
